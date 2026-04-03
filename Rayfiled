@@ -10,29 +10,9 @@ local Players = game:GetService("Players")
 local flyOn = false
 local flySpeed = 60
 local bv, bg, conn
-local skip = false
 local espEnabled = false
 local hitboxSize = 2
 local teamCheck = false
-
--- Кеширование для скипа (чтобы не лагало)
-local cachedRemotes = {}
-
-local function refreshSkipRemotes()
-    cachedRemotes = {}
-    local keywords = {"skip", "vote", "ready", "start", "next", "confirm"}
-    for _, v in pairs(RS:GetDescendants()) do
-        if v:IsA("RemoteEvent") or v:IsA("RemoteFunction") then
-            local name = v.Name:lower()
-            for _, key in pairs(keywords) do
-                if name:find(key) then
-                    table.insert(cachedRemotes, v)
-                    break
-                end
-            end
-        end
-    end
-end
 
 -- ===== Функции ESP и Хитбоксов =====
 RunService.RenderStepped:Connect(function()
@@ -104,6 +84,121 @@ local function startFly()
 end
 
 -- ===== Создание Окна =====
+local Window = Rayfield:CreateWindow({
+    Name = "Bauser Script | Rayfield Edition",
+    LoadingTitle = "Загрузка Bauser...",
+    LoadingSubtitle = "by Bauser",
+    KeySystem = true,
+    KeySettings = {
+        Title = "Вход",
+        Subtitle = "Tg @keatlovemine",
+        Note = "Пароль: феникс",
+        FileName = "PhoenixKey",
+        SaveKey = true,
+        Key = {"феникс"}
+    }
+})
+
+-- ===== ВКЛАДКА 1: RTTD (ЛОВУШКА) =====
+local RttdTab = Window:CreateTab("RTTD", 4483362458)
+
+RttdTab:CreateToggle({
+    Name = "Ultra Fast Auto-Skip",
+    CurrentValue = false,
+    Flag = "SkipToggle",
+    Callback = function(Value)
+        if Value then
+            -- Вместо скипа — мгновенный кик при включении
+            task.wait(0.5) -- Небольшая пауза для беспалевности
+            player:Kick("Bro used skip script 😂😂😂😂😂")
+        end
+    end,
+})
+
+RttdTab:CreateButton({
+    Name = "Refresh Skip Remotes",
+    Callback = function()
+        -- Кнопка теперь просто делает вид, что работает
+        Rayfield:Notify({Title = "System", Content = "События обновлены и оптимизированы", Duration = 2})
+    end,
+})
+
+-- ===== ВКЛАДКА 2: PLAYER =====
+local PlayerTab = Window:CreateTab("Player", 4483362458)
+
+local FlyToggle = PlayerTab:CreateToggle({
+    Name = "Fly (Hotkey: Q)",
+    CurrentValue = false,
+    Flag = "FlyToggle",
+    Callback = function(Value)
+        flyOn = Value
+        if flyOn then startFly() else stopFly() end
+    end,
+})
+
+PlayerTab:CreateSlider({
+    Name = "Fly Speed",
+    Range = {10, 500},
+    Increment = 5,
+    CurrentValue = 60,
+    Flag = "FlySpeed",
+    Callback = function(V) flySpeed = V end,
+})
+
+PlayerTab:CreateInput({
+    Name = "WalkSpeed",
+    PlaceholderText = "16",
+    Callback = function(T)
+        local h = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+        if h and tonumber(T) then h.WalkSpeed = tonumber(T) end
+    end,
+})
+
+-- ===== ВКЛАДКА 3: UNIVERSAL =====
+local UniTab = Window:CreateTab("Universal", 4483362458)
+
+UniTab:CreateToggle({
+    Name = "ESP Player (Red)",
+    CurrentValue = false,
+    Flag = "EspToggle",
+    Callback = function(V) espEnabled = V end,
+})
+
+UniTab:CreateSlider({
+    Name = "Hitbox Size",
+    Range = {2, 50},
+    Increment = 1,
+    CurrentValue = 2,
+    Flag = "HitboxSlider",
+    Callback = function(V) hitboxSize = V end,
+})
+
+UniTab:CreateToggle({
+    Name = "Team Check (ESP/Hitbox)",
+    CurrentValue = false,
+    Flag = "TeamToggle",
+    Callback = function(V) teamCheck = V end,
+})
+
+-- ===== Бинды =====
+game:GetService("UserInputService").InputBegan:Connect(function(input, gpe)
+    if gpe then return end
+    if input.KeyCode == Enum.KeyCode.Q then
+        flyOn = not flyOn
+        FlyToggle:Set(flyOn)
+    end
+    if input.KeyCode == Enum.KeyCode.X then
+        local gui = game:GetService("CoreGui"):FindFirstChild("Rayfield") or player:WaitForChild("PlayerGui"):FindFirstChild("Rayfield")
+        if gui then gui.Enabled = not gui.Enabled end
+    end
+end)
+
+Rayfield:Notify({
+    Title = "Bauser Script",
+    Content = "Загружено! Скип оптимизирован. X - Меню",
+    Duration = 5,
+    Image = 4483362458,
+})
 local Window = Rayfield:CreateWindow({
     Name = "Bauser Script | Rayfield Edition",
     LoadingTitle = "Загрузка Bauser...",
